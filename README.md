@@ -99,6 +99,13 @@ Dashlytics/
 │   └── dashboard.html    # Dashboard display
 └── uploads/              # Temporary file storage (auto-created)
 ```
+## Image Visuals
+
+<img width="1095" height="371" alt="image" src="https://github.com/user-attachments/assets/2265aefd-2874-4a4f-8206-01b5b720e620" />
+<img width="1315" height="629" alt="image" src="https://github.com/user-attachments/assets/96b3d437-f9c8-4d7c-affb-096ede9d5b03" />
+<img width="1320" height="631" alt="image" src="https://github.com/user-attachments/assets/d75e32d7-c0be-4131-9202-74969191a8ed" />
+<img width="1298" height="645" alt="image" src="https://github.com/user-attachments/assets/59130434-d47a-4b03-9082-0defa5bab238" />
+<img width="1307" height="661" alt="image" src="https://github.com/user-attachments/assets/b017fb45-6881-4d8e-9629-33956cfe0b82" />
 
 ## Contributing
 
