@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-chart-bar text-primary me-3"></i>
+                    Sales Data Analytics Dashboard
+                </h1>
+                <p class="lead text-muted">
+                    Upload your sales data (CSV, Excel, or JSON) and get instant insights with beautiful visualizations
+                </p>
+            </div>
+
+            <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                    <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+                    <h3 class="mb-3">Upload Your Sales Data</h3>
+                    <p class="text-muted mb-3">
+                        Drag and drop your file here or click to browse
+                    </p>
+                    <p class="small text-muted">
+                        Supports: CSV, Excel (.xlsx, .xls), JSON files • Max size: 16MB
+                    </p>
+                    <input type="file" 
+                           id="file-input" 
+                           name="file" 
+                           accept=".csv,.xlsx,.xls,.json" 
+                           style="display: none;" 
+                           onchange="updateFileName(this)"
+                           required>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <span id="file-name" class="text-muted small"></span>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-analytics me-2"></i>
+                        Analyze Data & Generate Dashboard
+                    </button>
+                </div>
+            </form>
+
+            <div class="row mt-5">
+                <div class="col-md-4 text-center">
+                    <div class="p-4">
+                        <i class="fas fa-upload fa-3x text-primary mb-3"></i>
+                        <h5>Easy Upload</h5>
+                        <p class="text-muted small">Simply upload your CSV, Excel, or JSON file</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="p-4">
+                        <i class="fas fa-chart-pie fa-3x text-primary mb-3"></i>
+                        <h5>Auto Analysis</h5>
+                        <p class="text-muted small">Automatic data analysis and visualization generation</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="p-4">
+                        <i class="fas fa-tachometer-alt fa-3x text-primary mb-3"></i>
+                        <h5>Interactive Dashboard</h5>
+                        <p class="text-muted small">Beautiful, interactive charts and insights</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateFileName(input) {
+    const fileName = input.files[0]?.name;
+    const fileNameSpan = document.getElementById('file-name');
+    if (fileName) {
+        fileNameSpan.innerHTML = `<i class="fas fa-file me-2"></i>Selected: ${fileName}`;
+        fileNameSpan.className = 'text-success small';
+    }
+}
+
+// Drag and drop functionality
+const uploadArea = document.querySelector('.upload-area');
+const fileInput = document.getElementById('file-input');
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.backgroundColor = '#e8edff';
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.backgroundColor = '';
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.backgroundColor = '';
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        updateFileName(fileInput);
+    }
+});
+</script>
+{% endblock %}

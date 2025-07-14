@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ filename }} - Dashlytics{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        Sales Data Dashboard
+                    </h2>
+                    {% if filename %}
+                        <p class="text-muted mb-0">Analysis for: {{ filename }}</p>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-plus me-2"></i>Upload New File
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <i class="fas fa-table fa-2x mb-2"></i>
+                <h4>{{ "{:,}".format(analysis.shape[0]) }}</h4>
+                <p class="mb-0">Total Rows</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <i class="fas fa-columns fa-2x mb-2"></i>
+                <h4>{{ analysis.shape[1] }}</h4>
+                <p class="mb-0">Columns</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <i class="fas fa-calculator fa-2x mb-2"></i>
+                <h4>{{ analysis.numeric_columns|length }}</h4>
+                <p class="mb-0">Numeric Fields</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <i class="fas fa-tags fa-2x mb-2"></i>
+                <h4>{{ analysis.categorical_columns|length }}</h4>
+                <p class="mb-0">Category Fields</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualizations -->
+    <div class="row">
+        {% if plots.time_series %}
+        <div class="col-12 mb-4">
+            <div class="chart-container">
+                <div id="time-series-chart"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if plots.top_categories %}
+        <div class="col-lg-6 mb-4">
+            <div class="chart-container">
+                <div id="top-categories-chart"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if plots.pie_chart %}
+        <div class="col-lg-6 mb-4">
+            <div class="chart-container">
+                <div id="pie-chart"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if plots.distribution %}
+        <div class="col-lg-6 mb-4">
+            <div class="chart-container">
+                <div id="distribution-chart"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if plots.correlation %}
+        <div class="col-lg-6 mb-4">
+            <div class="chart-container">
+                <div id="correlation-chart"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Data Details -->
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Column Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Type</th>
+                                    <th>Missing Values</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for column in analysis.columns %}
+                                <tr>
+                                    <td><strong>{{ column }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if column in analysis.numeric_columns else 'info' }}">
+                                            {{ analysis.dtypes[column] }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if analysis.missing_values[column] > 0 %}
+                                            <span class="badge bg-warning">{{ analysis.missing_values[column] }}</span>
+                                        {% else %}
+                                            <span class="badge bg-success">0</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if analysis.statistics %}
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Statistical Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Statistic</th>
+                                    {% for col in analysis.numeric_columns[:3] %}
+                                    <th>{{ col }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in ['mean', 'std', 'min', 'max'] %}
+                                <tr>
+                                    <td><strong>{{ stat.title() }}</strong></td>
+                                    {% for col in analysis.numeric_columns[:3] %}
+                                    <td>{{ "%.2f"|format(analysis.statistics[col][stat]) }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sample Data -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>
+                        Sample Data (First 10 Rows)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    {% for column in analysis.columns %}
+                                    <th>{{ column }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in analysis.sample_data %}
+                                <tr>
+                                    {% for column in analysis.columns %}
+                                    <td>{{ row[column] if row[column] is not none else 'N/A' }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Render Plotly charts
+{% if plots.time_series %}
+var timeSeriesData = {{ plots.time_series|safe }};
+Plotly.newPlot('time-series-chart', timeSeriesData.data, timeSeriesData.layout, {responsive: true});
+{% endif %}
+
+{% if plots.top_categories %}
+var topCategoriesData = {{ plots.top_categories|safe }};
+Plotly.newPlot('top-categories-chart', topCategoriesData.data, topCategoriesData.layout, {responsive: true});
+{% endif %}
+
+{% if plots.pie_chart %}
+var pieChartData = {{ plots.pie_chart|safe }};
+Plotly.newPlot('pie-chart', pieChartData.data, pieChartData.layout, {responsive: true});
+{% endif %}
+
+{% if plots.distribution %}
+var distributionData = {{ plots.distribution|safe }};
+Plotly.newPlot('distribution-chart', distributionData.data, distributionData.layout, {responsive: true});
+{% endif %}
+
+{% if plots.correlation %}
+var correlationData = {{ plots.correlation|safe }};
+Plotly.newPlot('correlation-chart', correlationData.data, correlationData.layout, {responsive: true});
+{% endif %}
+
+window.addEventListener('resize', function() {
+    {% if plots.time_series %}Plotly.Plots.resize('time-series-chart');{% endif %}
+    {% if plots.top_categories %}Plotly.Plots.resize('top-categories-chart');{% endif %}
+    {% if plots.pie_chart %}Plotly.Plots.resize('pie-chart');{% endif %}
+    {% if plots.distribution %}Plotly.Plots.resize('distribution-chart');{% endif %}
+    {% if plots.correlation %}Plotly.Plots.resize('correlation-chart');{% endif %}
+});
+</script>
+{% endblock %}
